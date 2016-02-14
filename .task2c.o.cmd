@@ -913,6 +913,7 @@ deps_/home/seed/sensei/hw2_firewall/task2c.o := \
   include/net/timewait_sock.h \
   include/linux/udp.h \
   include/linux/ip.h \
+  include/linux/inet.h \
 
 /home/seed/sensei/hw2_firewall/task2c.o: $(deps_/home/seed/sensei/hw2_firewall/task2c.o)
 
