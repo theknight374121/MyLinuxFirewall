@@ -1,0 +1,1 @@
+cmd_/home/seed/sensei/hw2_firewall/myfirewall.ko := ld -r -m elf_i386 -T /usr/src/linux-headers-3.5.0-37-generic/scripts/module-common.lds --build-id  -o /home/seed/sensei/hw2_firewall/myfirewall.ko /home/seed/sensei/hw2_firewall/myfirewall.o /home/seed/sensei/hw2_firewall/myfirewall.mod.o
