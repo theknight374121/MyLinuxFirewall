@@ -52,7 +52,7 @@ unsigned int main_in_hook_funct(unsigned int hooknum,
 		if(strcmp(sniffedsrc,machinebip)==0){
 		tcp_header = (struct tcphdr *)skb_transport_header(sock_buff);
 		printk(KERN_INFO "the match port is %d and the tcp port is %d",matchport,ntohs(tcp_header->dest));
-		if((ntohs(tcp_header->dest)==matchport || ntohs(tcp_header->source)==matchport)==0){
+		if(tcp_header->dest)==matchport || ntohs(tcp_header->source)==matchport){
 		printk(KERN_INFO "got a telnet packet coming in %s target and dropped it.\n",sniffedsrc);	
 		return NF_DROP;
 		}

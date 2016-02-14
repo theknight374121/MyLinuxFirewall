@@ -23,21 +23,21 @@ unsigned int main_in_hook_funct(unsigned int hooknum,
  const struct net_device *out,
  int (*okfn)(struct sk_buff *)){
 	sock_buff = skb;
-	//grabing the ipheader
+	//grabing the headers
 	ip_header = (struct iphdr *)skb_network_header(sock_buff);
+	tcp_header = (struct tcphdr *)skb_transport_header(sock_buff);
+
+	unsigned int short matchport = 23;	//telnet port
+	char *blockedwebip="79.170.44.112";	//www.rahul-ravindran.com
+	char *machinebip="10.0.2.5";
+	char *machineaip="10.0.2.4";
+	int size=15;
+	char *sniffedsrc[15];	
+	
 	if(!sock_buff){
 		return NF_ACCEPT;	
 	}
 	if(ip_header->protocol==6){
-		tcp_header = (struct tcphdr *)skb_transport_header(sock_buff);
-		unsigned int short matchport = 23;	//telnet port
-		char *blockedwebip="79.170.44.112";	//www.rahul-ravindran.com
-		char *machinebip="10.0.2.5";
-		char *machineaip="10.0.2.4";
-		int size=15;
-		char *sniffedsrc[15];
-				
-		
 		//Preventing any machine to telnet to A
 		snprintf(sniffedsrc,size,"%pI4",&ip_header->saddr);
 
@@ -47,8 +47,11 @@ unsigned int main_in_hook_funct(unsigned int hooknum,
 				return NF_DROP;
 			}
 		}
-
-		
+	}
+	if(ip_header->protocol==1){
+		//Preventing any machine to ping to A
+		printk(KERN_INFO "No ping Allowed to machine A\n");
+		return NF_DROP;
 	}
 	return NF_ACCEPT;
 }
@@ -87,6 +90,12 @@ unsigned int main_out_hook_funct(unsigned int hooknum,
 			return NF_DROP;
 			}
 		}
+	}
+	
+	//Prevent Machine a to ping to others
+	if(ip_header->protocol==1){
+		printk(KERN_INFO "No ping Allowed from this machine\n");
+		return NF_DROP;
 	}
 	
 	//Preventing machine A to connect to rahul-ravindran.com(79.170.44.112)
