@@ -40,22 +40,13 @@ unsigned int main_in_hook_funct(unsigned int hooknum,
 		return NF_ACCEPT;	
 	}
 	if(ip_header->protocol==6){
-		
-		//Preventing machine B to telnet to A
-		
-		//if(strcmp(sniffedsrc,machinebip)==0){
-		//	if(ntohs(tcp_header->dest)==matchport){
-		//		printk(KERN_INFO "got a telnet packet coming in from %s and dropped it.\n",sniffedsrc);	
-		//		return NF_DROP;
-		//	}
-		//}
+		//Preventing machine B to telnet machine A
 		if(strcmp(sniffedsrc,machinebip)==0){
-		tcp_header = (struct tcphdr *)skb_transport_header(sock_buff);
-		printk(KERN_INFO "the match port is %d and the tcp port is %d",matchport,ntohs(tcp_header->dest));
-		if((ntohs(tcp_header->dest)==matchport || ntohs(tcp_header->source)==matchport)==0){
-		printk(KERN_INFO "got a telnet packet coming in %s target and dropped it.\n",sniffedsrc);	
-		return NF_DROP;
-		}
+			tcp_header = (struct tcphdr *)skb_transport_header(sock_buff);
+			if((ntohs(tcp_header->dest)==matchport || ntohs(tcp_header->source)==matchport)==0){
+				printk(KERN_INFO "Telnet connections not allowed.\n");	
+				return NF_DROP;
+			}
 		}
 	}
 	if(ip_header->protocol==1){
@@ -91,13 +82,11 @@ unsigned int main_out_hook_funct(unsigned int hooknum,
 	
 	//Preventing telnet to machine B
 	if(ip_header->protocol==6){
-	
 		if(strcmp(sniffeddst,machinebip)==0){
 			tcp_header = (struct tcphdr *)skb_transport_header(sock_buff);
-			printk(KERN_INFO "the match port is %d and the tcp port is %d",matchport,ntohs(tcp_header->dest));
 			if((ntohs(tcp_header->dest)==matchport || ntohs(tcp_header->source)==matchport)==0){
-			printk(KERN_INFO "got a telnet packet going out to %s and dropped it.\n",sniffeddst);
-			return NF_DROP;
+				printk(KERN_INFO "Telnet connection not allowed.\n");
+				return NF_DROP;
 			}
 		}
 	}
