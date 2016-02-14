@@ -6,6 +6,8 @@
 #include <linux/tcp.h>
 #include <linux/udp.h>
 #include <linux/ip.h>
+#include <linux/byteorder/generic.h>
+#include <linux/inet.h>
 
 static struct nf_hook_ops ingress_hook; //netfilter hook for incoming packets
 static struct nf_hook_ops egress_hook;	//netfilter hook for outgoing packets
@@ -26,8 +28,15 @@ unsigned int main_hook_funct(unsigned int hooknum,
 	}
 	if(ip_header->protocol==6){
 		tcp_header = (struct tcphdr *)skb_transport_header(sock_buff);
-		printk(KERN_INFO "got a tcp packet and dropped it.\n");
-		return NF_DROP;
+		unsigned int short matchport = 23;
+		if(ntohs(tcp_header->dest)==matchport){
+			printk(KERN_INFO "got a telnet packet going out and dropped it.\n");
+			return NF_DROP;
+		}
+		if(ntohs(tcp_header->source)==matchport){
+			printk(KERN_INFO "got a telnet packet coming in and dropped it.\n");
+			return NF_DROP;
+		}
 	}
 	return NF_ACCEPT;
 }
@@ -35,7 +44,7 @@ unsigned int main_hook_funct(unsigned int hooknum,
 
 int init_module(void){
 ingress_hook.hook = main_hook_funct;
-ingress_hook.hooknum = NF_INET_PRE_ROUTING;
+ingress_hook.hooknum = NF_INET_LOCAL_OUT;
 ingress_hook.pf = PF_INET;
 ingress_hook.priority = NF_IP_PRI_FIRST;
 nf_register_hook(&ingress_hook);
